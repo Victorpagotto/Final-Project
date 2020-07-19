@@ -1,0 +1,36 @@
+//Matrix tests
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main (void){
+	int c, j, t, tt, v1, v2,a=1;
+	printf("Value for t: ");
+	scanf("%i", &t);
+	printf("Value for tt: ");
+	scanf("%i", &tt);
+	v1=t+4;
+	v2=tt+4;
+	int matrix[v1][v2];
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			matrix[c][j]=0;
+		}
+	}
+	for (c=2;c<12;c++){
+		for (j=2;j<12;j++){
+		matrix[c][j]=a;
+		a++;
+		if (a>9){
+			a=1;
+		}
+		}
+	}
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			printf("%i ", matrix [c][j]);
+		}
+		printf("\n");
+	}
+	
+}
