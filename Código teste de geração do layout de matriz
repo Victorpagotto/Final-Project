@@ -34,3 +34,101 @@ int main (void){
 	}
 	
 }
+======================================================================================================================================================================
+21/07/2020
+//Matrix tests
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main (void){
+	int c, j, t, tt, v1, v2,a=1, conv[40], function[9], mline=-1, mcolumn=-1, kline=0, kcolumn=0,func=0,sum=0, check=0, check2=0;
+	printf("Value for t: ");
+	scanf("%i", &t);
+	printf("Value for tt: ");
+	scanf("%i", &tt);
+	v1=t+4;
+	v2=tt+4;
+	int matrix[v1][v2], image[v1][v2];
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			matrix[c][j]=0;
+		}
+	}
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			image[c][j]=0;
+		}
+	}
+	for (c=0;c<9;c++){
+		function[c]=1;
+//		a++;
+//		if (a>1){
+//			a=0;
+//		}
+	}
+	printf("function:\n");
+	for (c=0;c<9;c++){
+		printf("%i ", function[c]);
+	}
+	printf("\n-----------------------\n");
+	a=1;
+	for (c=2;c<12;c++){
+		for (j=2;j<12;j++){
+			matrix[c][j]=a;
+			a++;
+			if (a>9){
+				a=1;
+			}
+		}
+	}
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			printf("%i ", matrix [c][j]);
+		}
+		printf("\n");
+	}
+	//////////////////////
+	printf("\n--------------\ntesting\n-------------------\n");
+	for (check=0;check<4;check++){ 							//Linha da posição maior.
+		mline=mline+3;
+		for (check2=0;check2<4;check2++){						//Coluna da posição maior.
+			mcolumn=mcolumn+3;
+			for (c=0;c<3;c++){					//Linha da Kernel.
+				kline=mline-1+c;
+				for (j=0;j<3;j++){				//Coluna da Kernel.
+					kcolumn=mcolumn-1+j;
+					printf("Position[%i][%i]: %i \n", kline, kcolumn, matrix[kline][kcolumn]);
+					sum=sum+(matrix[kline][kcolumn]*function[func]);
+					func++;
+				}
+			}
+			func=0;
+//			if (matrix[mline][kcolumn]==0){
+//				check2=1;
+//			}
+			image[mline][mcolumn]=sum;
+			sum=0;
+		}
+//		if (matrix[mline-1][kcolumn-1]==0){
+//			check=1;
+//		}
+		mcolumn=-1;
+	}
+	printf("\n-------------------------\n");
+	printf("--------------------------");
+	printf("\nImage: \n");
+	printf("--------------------------\n");
+	for (c=0;c<v1;c++){
+		for (j=0;j<v2;j++){
+			if (image[c][j]<=9){
+				printf("0%i ", image[c][j]);
+			}
+			if (image[c][j]>=10){
+				printf("%i ", image[c][j]);
+			}
+		}
+		printf("\n");
+	}
+}
+//Solução: for com centro da kernel -1
