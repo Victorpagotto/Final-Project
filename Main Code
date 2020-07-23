@@ -1,1 +1,136 @@
-
+23/07/2020; 02:17
+//Convolutional.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct sData{
+	//Outside of identifiers.
+	int memory_holder;
+	int mirror[9];
+	//Inside of identifiers.
+	int sizes[2]; //[0]=lines, [1]=columns
+	int imageSize[2];
+	int **matrix;
+	int *image;
+	int *array;
+} Dt;
+//Dictionary:
+//m==memory
+//Dt=data, that is, the information for an entire convolution.
+//mt=matrix.
+//ar=array.
+//mr=mirror
+//[0]'s are mostly used for identifier. That means using them for the sake of positioning, then all arrays and matrices will have their [0] or [0][0] for identifying the position each one is for the sake of sync.
+////////////////////
+//Simple functions//
+////////////////////
+//====================================================
+//Memory allocation function.
+Dt* mAllocation (int mSize){
+	Dt *data;
+	data=(Dt*) malloc (mSize*sizeof(Dt)+sizeof(Dt)); //[0].imageSize is always a possible identifier,
+	return data;
+}
+//====================================================
+//Array allocation function.
+int* mArAllocation (int mSize){
+	int *data;
+	data=(int*) malloc (mSize*sizeof(int)+sizeof(int)); //[0].imageSize is always a possible identifier,
+	return data;
+}
+//====================================================
+//Memory reallocation function.
+Dt* mReallocation (Dt data[]){
+	data=(Dt*) realloc(data, data[0].imageSize[0]*sizeof(Dt)+sizeof(Dt)+data[0].memory_holder);
+	return data;
+}
+//====================================================
+//Matrix memory allocation function.
+void mtMAllocation (Dt data[]){
+	printf("\nO valor real eh: %i\n", data[data[0].imageSize[0]].sizes[0]);
+	int c;
+	data[data[0].imageSize[0]].matrix=(int**) malloc(2*(data[data[0].imageSize[0]].sizes[0]*sizeof(int))); //[0].imageSize is always a possible identifier,
+	for (c=0;c<=data[data[0].imageSize[0]].sizes[0];c++){ 
+		data[data[0].imageSize[0]].matrix[c]=(int*) malloc(2*(data[data[0].imageSize[0]].sizes[0]*sizeof(int)));
+	}
+	data[0].memory_holder+=(2*(data[data[0].imageSize[0]].sizes[0]*sizeof(int)))*(2*(data[data[0].imageSize[0]].sizes[0]*sizeof(int)));
+}
+//====================================================
+//Metrix creation.
+void creatingMt(Dt data[]){
+	data[data[0].imageSize[0]].sizes[0]=0;
+	data[data[0].imageSize[0]].sizes[1]=0;
+	printf("====================================================\n");
+	printf("CURRENT POSITION: %i\n", data[0].imageSize[0]);
+	printf("please, do insert number of lines (minimun 3): ");
+	scanf("%i", &data[data[0].imageSize[0]].sizes[0]);
+	data[data[0].imageSize[0]].sizes[0]=data[data[0].imageSize[0]].sizes[0]+4;
+//	if (data[data[0].imageSize[0]].sizes[0]<7){
+//		data[data[0].imageSize[0]].sizes[0]=7;
+//	}
+	printf("Please, do insert the number of columns (minimun 3): ");
+	scanf("%i", &data[data[0].imageSize[0]].sizes[1]);
+	data[data[0].imageSize[0]].sizes[1]=data[data[0].imageSize[0]].sizes[1]+4;
+//	if (data[data[0].imageSize[0]].sizes[1]<7){
+//		data[data[0].imageSize[0]].sizes[1]=7;
+//	}
+	mtMAllocation(data);
+}
+//====================================================
+//////////////////
+//Main functions//
+//////////////////
+//====================================================
+//Matrix creation.
+void mtCreation(Dt data[]){
+	int sizes[2],c,j;
+	//Creating and allocating the matrix.
+	creatingMt(data);
+	//Denulifying matrix.
+	for (c=0;c<data[data[0].imageSize[0]].sizes[0];c++){
+		for (j=0;j<data[data[0].imageSize[0]].sizes[1];j++){
+			data[data[0].imageSize[0]].matrix[c][j]=0;
+		}
+	}
+	//Loading matrix.
+	for (c=2;c<data[data[0].imageSize[0]].sizes[0]-1;c++){
+		for (j=2;j<data[data[0].imageSize[0]].sizes[1]-1;j++){
+			printf("Insert the value for [%i][%i] ", c, j);
+			scanf("%i", &data[data[0].imageSize[0]].matrix[c][j]);
+		}
+	}
+	data[0].imageSize[0]++;
+	printf("\nThe actual size is: %i\n", data[0].imageSize[0]);
+	data=mReallocation(data);
+}
+//====================================================
+//Main function.
+int main (void){
+	int loop=1;
+	Dt *data;
+	//data=mAllocation(mSize);
+	data=mAllocation(1);
+	data[0].imageSize[0]=1;
+	data[0].memory_holder=8;
+	//Main program.
+	while(loop!=0){
+		printf("====================================================\n");
+		printf("Please, do insert your course of action: ");
+		printf("\n\t1: creating a matrix.\n\t2: randomizing a matrix.\n\t3: Seing a matrix. \n\t4: Creating a mirror.\n\t5: Seing all mirrors.\n\t6: Convoluting a matrix with a mirror.\n\t7: Seing all convoluted arrays.\n\t8: Seing all convoluted matrices.\n\tType in '0' for exiting.\n");
+		printf("Command: ");
+		scanf("%i", &loop);
+		switch (loop){
+			case 0: break;
+			case 1: mtCreation(&*data);
+//			case 2: mtRandom(&*data);
+//			case 3: seeMt(&*data);
+//			case 4: createMr(&*data);
+//			case 5: seeMr(&*data);
+//			case 6: convoluteMt(&*data);
+//			case 7: convolutedAr(&*data);
+//			case 8: convolutedMt(&*data);
+			default: loop=9;
+		}
+	}
+	return 0;
+}
