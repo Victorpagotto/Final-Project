@@ -1,0 +1,604 @@
+//Dictionary:
+//m==memory
+//ml=memory limite.
+//Dt=data, that is, the information for an entire aspect.
+//mt=matrix.
+//ar=array.
+//mr=mirror
+//sz=size or sizes.
+//im=image;
+//id=identifier
+//[0]'s are mostly used for identifier. That means using them for the sake of positioning, then all arrays and matrices will have their [0] or [0][0] for identifying the position each one is, for the sake of syncing.
+//Convolutional.
+//Memory error.
+//////////////////////////////////////
+//Error informations:				//
+//Code 1: Memory allocation failure.//
+//Code 2: Not compatible data type. //
+//////////////////////////////////////
+//
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#define PP 12 //Size of a pointer.
+#define ML 100 //Memory limit
+typedef struct sData{
+	int id[2];
+	int sz[2];
+	int **mt;
+}Data;
+typedef struct sMrdata{
+	int id;
+	int mr[9];
+}Mrdata;
+///////////////
+//Prototyping//
+///////////////
+//====================================================
+Data* mAllocation (int mSize);
+Mrdata* mrMAllocation (int mSize);
+void mtMAllocation (Data dt[]);
+void negative_printing (int num, int id);
+void positive_printing (int num, int id);
+void printing (int num, int id);
+void mtPrinter(Data dt[], int position);
+void mrPrinter(Mrdata mrdt[], int position);
+int ranGen(int lowest, int highest);
+void creatingMt (Data dt[]);
+void denulyfier(Data dt[]);
+void mtLoader(Data dt[]);
+void mtCreation(Data dt[]);
+int rangeChoiceLowest();
+int rangeChoiceHighest();
+int checkingHighestLowest (int l, int h);
+void loadingRandom(Data dt[], int l, int h);
+void mtRandom(Data dt[]);
+void seing (Data dt[]);
+void randomMirror (Mrdata mrdt[], int c);
+void createMr(Mrdata mrdt[]);
+void seeMr(Mrdata mrdt[]);
+void InitialMessege(int imdt);
+int choosingMatrix (Data dt[], Mrdata mrdt[]);
+int choosingMirror (Data dt[], Mrdata mrdt[]);
+int** convolutionMt(Data dt[], int ps);
+void convolutionDenulyfier (int **matrix, Data dt[], int ps);
+int choosePoint();
+void Convolution (int ps, int mrps, int point, int **matrix, Data dt[], Mrdata mrdt[]);
+void printingConvolution(int **matrix, Data dt[], int ps, int point);
+void freeingConvolution(Data dt[], int **matrix, int ps);
+void convolutionControl(Data dt[], int imdt, Mrdata mrdt[]);
+int menuChoice();
+//====================================================
+//////////////////////////////////////////
+//Simple functions and Memory Allocation//
+//////////////////////////////////////////
+//====================================================
+//Initial memory allocation.
+Data* mAllocation (int mSize){
+	Data *data;
+	data=(Data*) malloc (mSize*(sizeof(Data)+16)); //[0] is always a possible identifier,
+	if (data==NULL){
+		exit(1);
+	}
+	return data;
+}
+Mrdata* mrMAllocation (int mSize){
+	Mrdata *mrdata;
+	mrdata=(Mrdata*) malloc (mSize*(sizeof(Mrdata)+12)); //[0] is always a possible identifier,
+	if (mrdata==NULL){
+		exit(1);
+	}
+	return mrdata;
+}
+//====================================================
+//Matrix memory allocation function.
+void mtMAllocation (Data dt[]){
+	int c;
+	dt[dt[0].id[0]].mt=(int**) malloc(dt[dt[0].id[0]].sz[0]*PP); //[0]. is always a possible identifier,
+	if (dt[dt[0].id[0]].mt==NULL){
+		exit(1);
+	}
+	for (c=0;c<=dt[dt[0].id[0]].sz[0];c++){ 
+		dt[dt[0].id[0]].mt[c]=(int*) malloc(dt[dt[0].id[0]].sz[1]*sizeof(int));
+		if (dt[dt[0].id[0]].mt[c]==NULL){
+			exit(1);
+		}
+	}
+}
+//====================================================
+//Number printing modules partition.
+//====================================================
+void negative_printing (int num, int id){
+	if (num<10 && num>0){
+		printf("###-%i ", num);
+	}
+	if (num<100 && num>9){
+		printf("##-%i ", num);
+	}
+	if (num<1000 && num>99){
+		printf("#-%i ", num);
+	}
+	if (num<10000 && num>1000 || num==1000 && id==2){
+		printf("-%i ", num);
+	}
+}
+void positive_printing (int num, int id){
+	if (num<10 && num>0){
+		printf("####%i ", num);
+	}
+	if (num<100 && num>9){
+		printf("###%i ", num);
+	}
+	if (num<1000 && num>99){
+		printf("##%i ", num);
+	}
+	if (num<10000 && num>1000 || num==1000 && id==2){
+		printf("#%i ", num);
+	}
+	if (num==0 && id==1 || num==10000 && id==2){
+		printf("///// ");
+	}
+	if (num==0 && id==2 || num==1000 && id==1){
+		printf("####0 ");
+	}
+}
+//Controls where numbers go, positive or negative.
+void printing (int num, int id){
+	if (num>=0){
+		positive_printing(num,id);
+	}
+	if (num<0){
+		num-=2*num;
+		negative_printing(num,id);
+	}
+}
+//====================================================
+//Matrix printer.
+void mtPrinter(Data dt[], int position){
+	int c,j;
+	printf("\n-------------------------\n");
+	printf("Matrix in position %i", position);
+	printf("\n-------------------------\n");
+	for (c=0;c<=dt[position].sz[0]-1;c++){
+		for (j=0;j<=dt[position].sz[1]-1;j++){
+			printing(dt[position].mt[c][j], 1);
+		}
+		printf("\n");
+	}
+	printf("\n-------------------------\n");
+}
+//====================================================
+//Mirror printer.
+void mrPrinter(Mrdata mrdt[], int position){
+	int c;
+		printf("\n-------------------------\n");
+		printf("Mirror in position %i: | ", position);
+		for (c=0;c<9;c++){
+			printf("%i, ", mrdt[position].mr[c]);
+		}
+		printf("|\n-------------------------\n");
+}
+//====================================================
+//Random generator.
+int ranGen(int lowest, int highest){
+	int num;
+	num=lowest+(rand()%(highest-lowest+1));
+	return num;
+}
+//====================================================
+//////////////////
+//Main functions//
+//////////////////
+//====================================================
+//====================================================
+//Creating matrix - partition.
+//====================================================
+//Common functions:
+//Collecting user information..
+void creatingMt (Data dt[]){
+	dt[dt[0].id[0]].sz[0]=0;
+	dt[dt[0].id[0]].sz[1]=0;
+	printf("====================================================\n");
+	printf("CURRENT POSITION: %i\n", dt[0].id[0]);
+	printf("please, do insert number of lines (minimun 3): ");
+	if (scanf("%i", &dt[dt[0].id[0]].sz[0])!=1){exit(2);}
+	if (dt[dt[0].id[0]].sz[0]<3){
+		printf("You have inserted a too small number; thus size becomes '3'.\n");
+		dt[dt[0].id[0]].sz[0]=3;
+	}
+	dt[dt[0].id[0]].sz[0]+=6;
+	printf("Please, do insert the number of columns (minimun 3): ");
+	if (scanf("%i", &dt[dt[0].id[0]].sz[1])!=1){exit(2);}
+	if (dt[dt[0].id[0]].sz[1]<3){
+		printf("You have inserted a too small number; thus size becomes '3'.\n");
+		dt[dt[0].id[0]].sz[1]=3;
+	}
+	dt[dt[0].id[0]].sz[1]+=6;
+}
+//Matrix denulifier.
+void denulyfier(Data dt[]){
+	int c,j;
+	for (c=0;c<dt[dt[0].id[0]].sz[0];c++){
+		for (j=0;j<dt[dt[0].id[0]].sz[1];j++){
+			dt[dt[0].id[0]].mt[c][j]=0;
+		}
+	}
+}
+//====================================================
+//Creating a matrix by hand.
+void mtLoader(Data dt[]){
+	int c,j,num;
+	printf("\nPlease, do insert numbers bigger than -99 and lesser than 99.\n");
+	for (c=3;c<dt[dt[0].id[0]].sz[0]-3;c++){
+		for (j=3;j<dt[dt[0].id[0]].sz[1]-3;j++){
+			do {
+				printf("Insert the value for [%i][%i] ", c-2, j-2);
+				if (scanf("%i", &num)!=1){exit(2);}
+				if (num!=0){
+					dt[dt[0].id[0]].mt[c][j]=num;
+				}
+				if (num==0){
+					dt[dt[0].id[0]].mt[c][j]=1000;
+				}
+				if (num>99 || num<-99){
+					printf("Number out of range, which is bigger than -99 and lesser than 99.\n");
+				}
+			}while (num>99 || num<-99);
+		}
+	}	
+}
+//Matrix creation.
+void mtCreation(Data dt[]){
+	//Creating and allocating the matrix.
+	creatingMt(dt);
+	mtMAllocation(dt);
+	//Denulifying matrix.
+	denulyfier(dt);
+	//Loading matrix.
+	mtLoader(dt);
+	//Increasing range.
+	dt[0].id[0]++;
+}
+//====================================================
+//Randomly creating a matrix.
+//Setting up the range. Returns l (lowest) and h (highest).
+int rangeChoiceLowest(){
+	int l;
+	do{
+		printf("Insert the lowest number in range within -99 and 99: ");
+		if (scanf("%i", &l)!=1){exit(2);}
+		if (l>99 && l<-99){
+			printf("Please, insert a valid number.");
+		}
+	}while (l>99 || l<-99);
+	return l;
+}
+int rangeChoiceHighest(){
+	int h;
+	do{
+		printf("Insert the highest number in range within -99 and 99: ");
+		if (scanf("%i", &h)!=1){exit(2);}
+		if (h>99 && h<-99){
+			printf("Please, insert a valid number.");
+		}
+	}while (h>99 || h<-99);
+	return h;
+}
+int checkingHighestLowest (int l, int h){
+	int check;
+	if (h>l){
+		check=1;
+	}
+	if (l>h){
+		check=0;
+	}
+	return check;
+}
+//Loading the matrix with random numbers.
+void loadingRandom(Data dt[], int l, int h){
+	int c,j,num;
+	for (c=3;c<dt[dt[0].id[0]].sz[0]-3;c++){
+		for (j=3;j<dt[dt[0].id[0]].sz[1]-3;j++){
+			num=ranGen(l,h);
+			if (num!=0){
+				dt[dt[0].id[0]].mt[c][j]=num;
+			}
+			if (num==0){
+				dt[dt[0].id[0]].mt[c][j]=1000;
+			}
+		}
+	}
+}
+void mtRandom(Data dt[]){
+	int l,h;
+	//Creating and allocating the matrix.
+	creatingMt(dt);
+	mtMAllocation(dt);
+	//Denulifying matrix.
+	denulyfier(dt);
+	//Loading matrix.
+	do{
+		l=rangeChoiceLowest();
+		h=rangeChoiceHighest();
+	}while(checkingHighestLowest(l,h)==0);
+	loadingRandom(dt,l,h);
+	//Increasing range.
+	dt[0].id[0]++;
+}
+//====================================================
+//Seing a matrix.
+void seing (Data dt[]){
+	int position,c,j;
+	printf("====================================================\n");
+	printf("Insert position '-1' for exiting.\n");
+	do {
+		do {
+			printf("Please, insert the position of the desired matrix: ");
+			if ((scanf("%i", &position)!=1)){exit(2);}
+			if (position==-1){
+				return;
+			}
+		}while (position>=dt[0].id[0] || position<=0);
+		mtPrinter(dt, position);
+	}while(position!=-1);
+}
+//====================================================
+//Creating a mirror - partition.
+//====================================================
+//Creating random mirror.
+void randomMirror (Mrdata mrdt[], int c){
+	for (c=c;c<9;c++){
+		mrdt[mrdt[0].id].mr[c]=ranGen(-9,9);		}
+}
+//====================================================
+//Creating a mirror
+void createMr(Mrdata mrdt[]){
+	int c;
+	mrdt[0].id++;
+	printf("====================================================\n");
+	printf("CURRENT POSITION: %i\n", mrdt[0].id);
+	printf("Please, insert nine numbers which are smaller than 10 or bigger than -10. Or insert 11 as number for a random sequence starting from this position.\n");
+	for (c=0;c<9;c++){
+		do{
+			printf("Number %i: ", c+1);
+			if (scanf("%i", &mrdt[mrdt[0].id].mr[c])!=1){printf("\nFatal error; Invalid data type: not an integer.\n"); exit(0);}
+			if (mrdt[mrdt[0].id].mr[c]==11){
+				randomMirror(mrdt,c);
+				return;
+			}
+			if (mrdt[mrdt[0].id].mr[c]>9 || mrdt[mrdt[0].id].mr[c]<-9){
+				printf("-------------------------\n");
+				printf("Number out of range.");
+				printf("\n-------------------------\n");
+			}
+		}while(mrdt[mrdt[0].id].mr[c]>9 || mrdt[mrdt[0].id].mr[c]<-9);
+	}
+}
+//====================================================
+//====================================================
+//Seing a mirror (or Kernel).
+void seeMr(Mrdata mrdt[]){
+	int c, j;
+	printf("====================================================\n");
+	for (c=1;c<=mrdt[0].id;c++){
+		printf("\n-------------------------\n");
+		printf("Mirror in position %i: | ", c);
+		for (j=0;j<9;j++){
+			printf("%i, ", mrdt[c].mr[j]);
+		}
+		printf("|\n-------------------------\n");
+	}
+}
+//====================================================
+//====================================================
+//Convolution - partition.
+//====================================================
+//Initial messege.
+void InitialMessege(int imdt){
+	imdt++;
+	printf("====================================================\n");
+	printf("####################################################\n");
+	if (imdt<10){
+	printf("##############Convolution %i########################\n", imdt);
+	}
+	else{
+	printf("##############Convolution %i#######################\n", imdt);
+	}
+	printf("####################################################\n");
+}
+//====================================================
+//Chooses the position which in each will be used in the convolution.
+int choosingMatrix (Data dt[], Mrdata mrdt[]){
+	int ps;
+	do{
+		printf("Please, do insert the position of the desired matrix: ");
+		if ((scanf("%i", &ps)!=1)){exit(2);}
+		if (ps>=dt[0].id[0] || ps==0){
+			printf("POSITION OUT OF CREATED MATRICES RANGE\n");
+			return NULL;
+		}
+	}while(ps>=dt[0].id[0]);
+	return ps;
+}
+int choosingMirror (Data dt[], Mrdata mrdt[]){
+	int mrps;
+	do{
+		printf("Please, do insert the position of the desired mirror: ");
+		if (scanf("%i", &mrps)!=1){exit(2);}
+		if (mrps>mrdt[0].id || mrps==0){
+			printf("POSITION OUT OF CREATED MIRRORS RANGE\n");
+			return NULL;
+		}
+	}while(mrps>mrdt[0].id);
+	return mrps;
+}
+//====================================================
+//Creating matrix.
+int** convolutionMt(Data dt[], int ps){
+	int c;
+	int **pointer;
+	pointer=(int**) malloc (dt[ps].sz[0]*PP);
+	for (c=0;c<=dt[ps].sz[0];c++){
+		pointer[c]=(int*) malloc(dt[ps].sz[1]*sizeof(int));
+	}
+	return pointer;
+}
+//====================================================
+//Denulyfier
+void convolutionDenulyfier (int **matrix, Data dt[], int ps){
+	int c,j;
+	for (c=0;c<=dt[ps].sz[0];c++){
+		for (j=0;j<=dt[ps].sz[1];j++){
+			matrix[c][j]=10000;
+		}
+	}
+}
+//====================================================
+//Choosing kernel starting position.
+int choosePoint(){
+	int point;
+	do{
+		printf("\n-------------------------\n");
+		printf("Insert 0 if you want to start from border position, or 1 if you want to ignore it: ");
+		if ((scanf("%i", &point)!=1)){exit(2);}
+		printf("\n-------------------------\n");
+	}while (point>1 || point<0);
+	return point;
+}
+//====================================================
+//Convolution.
+void Convolution (int ps, int mrps, int point, int **matrix, Data dt[], Mrdata mrdt[]){
+	int mL=0, mC=0, kL, kC,c,j,func=0,ar=0,sum=0;
+	if (point==0){mL=2;}
+	if (point==1){mL=3;}
+	do{
+		if (point==0){mC=2;}
+		if (point==1){mC=3;}
+		mL+=1;
+		//Main column position (center of kernel)
+		do{
+			mC+=1;
+			for (c=0;c<3;c++){
+				kL=mL-1+c;
+				for (j=0;j<3;j++){
+					kC=mC-1+j;
+					if (dt[ps].mt[kL][kC]==1000){
+						sum=sum+(0*mrdt[mrps].mr[func]);
+					}
+					if (dt[ps].mt[kL][kC]!=1000){
+						sum=sum+(dt[ps].mt[kL][kC]*mrdt[mrps].mr[func]);	
+					}
+					func++;
+				}		
+			}	
+			matrix[mL][mC]=sum;			
+			ar++;
+			sum=0;
+			func=0;
+		}while(dt[ps].mt[mL-1][mC+2]!=0 || dt[ps].mt[mL][mC+2]!=0 || dt[ps].mt[mL+1][mC+2]!=0);
+	}while(dt[ps].mt[mL-1][mC+2]!=0 || dt[ps].mt[mL][mC+2]!=0 || dt[ps].mt[mL+1][mC+2]!=0 || dt[ps].mt[mL+2][mC-1]!=0 || dt[ps].mt[mL+2][mC]!=0 || dt[ps].mt[mL+2][mC+1]!=0);
+}
+//====================================================
+//Printing the convolution.
+void printingConvolution(int **matrix, Data dt[], int ps, int point){
+	int c,j;
+	printf("==================================================================================\n");
+	printf("\n-------------------------\n");
+	for (c=point;c<=dt[ps].sz[0]-point;c++){
+		for (j=point;j<=dt[ps].sz[1]-point;j++){
+			printing(matrix[c][j], 2);
+		}
+		printf("\n");
+	}
+	printf("\n-------------------------\n");
+	printf("==================================================================================\n");
+}
+//====================================================
+//Freeing memory.
+void freeingConvolution(Data dt[], int **matrix, int ps){
+	int c,j;
+	for (c=dt[ps].sz[0];c>=0;c--){
+			free(matrix[c]);
+	}
+}
+//====================================================
+//Control module.
+void convolutionControl(Data dt[], int imdt, Mrdata mrdt[]){
+	int ps, mrps, point;
+	int **matrix;
+	//Initial Messege
+	InitialMessege(imdt);
+	//Chooseing the matrix and the mirror.
+	ps=choosingMatrix(dt, mrdt);
+	mrps=choosingMirror(dt, mrdt);
+	//Creating the matrix which will hold the convoluted values.
+	matrix=convolutionMt(dt, ps);
+	//Denulifying.
+	convolutionDenulyfier(&*matrix, dt, ps);
+	//Choosing kernel starting position.
+//	point=choosePoint();
+	point=0;
+	//Doing the convolution.
+	Convolution(ps,mrps,point,&*matrix,dt,mrdt);
+	//Printing the results.
+	printingConvolution(&*matrix,dt,ps,point);
+	//Freeing the memory used in the convolution.
+	freeingConvolution(dt,&*matrix,ps);
+}
+/////////////////
+//Main Function//
+/////////////////
+//Menu messegue
+int menuChoice(){
+	int loop;
+	printf("====================================================\n");
+	printf("Please, do insert your course of action: ");
+	printf("\n\t0: Exiting.\n\t1: creating a matrix.\n\t2: randomizing a matrix.\n\t3: Seing a matrices. \n\t4: Creating a mirror.\n\t5: Seing all mirrors.\n\t6: Convolution.\n");
+	printf("Command: ");
+	if (scanf("%i", &loop)!=1){exit(2);}
+	return loop;
+}
+//Menu direction.
+void menu(int loop, Data dt[], Mrdata mrdt[], int imdt){
+	switch (loop){
+		case 0: break;
+		case 1: mtCreation(dt); break;
+		case 2: mtRandom(dt); break;
+		case 3: seing(dt); break;
+		case 4: createMr(mrdt); break;
+		case 5: seeMr(mrdt); break;
+		case 6: convolutionControl(dt, imdt, mrdt); break;
+		default: break;
+	}
+}
+//Freeing memory.
+void freeMainMemory(Data dt[], Mrdata mrdt[]){
+	int c,cc;
+	for (c=0;c<=ML;c++){
+		for (cc=0;cc<=dt[c].sz[0];cc++){
+				free(dt[c].mt[cc]);
+		}
+		free(dt);
+	}
+		free(mrdt);
+}
+int main (void){
+	int loop=9, imdt;
+	Data *dt; 
+	Mrdata *mrdt;
+	dt=mAllocation(ML);
+	dt[0].id[0]=1;
+	mrdt=mrMAllocation(ML);
+	mrdt[0].id=0;
+	srand(time(NULL));
+	//Main program.
+	do{
+		//Asks for a an action.
+		loop=menuChoice();
+		//Executes it.
+		menu(loop,dt,mrdt,imdt);
+	}while(loop!=0);
+	freeMainMemory(dt,mrdt);
+	return 0;
+}
